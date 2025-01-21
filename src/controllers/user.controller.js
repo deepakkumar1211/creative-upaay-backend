@@ -5,6 +5,17 @@ import {User} from "../models/user.model.js"
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose"
 
+const generateTokens = async (userId) => {
+    try {
+        const user = await User.findById(userId)
+        const accessToken = user.generateToken()
+
+        return accessToken;
+
+    } catch (error) {
+        throw new ApiError(500, "Something went wrong while generating token");
+    }
+}
 
 const registerUser = asyncHandler(async (req, res) => {
     console.log("Request Body:", req.body);
@@ -46,8 +57,52 @@ const registerUser = asyncHandler(async (req, res) => {
     );
 });
 
+const loginUser = asyncHandler(async (req,res) => {
+
+    const {email, password} = req.body
+
+    if (!email) {
+        throw new Error(400, " email is required");
+    }
+
+    if (!password) {
+        throw new Error(400, " password is required");
+    }
+
+    console.log("Request Body:", req.body); // Logs entire body
+    console.log("Email:", email);
+
+    const user = await User.findOne({email})
+
+    if (!user) {
+        throw new ApiError(404, "user does not exist");
+    }
+
+    const isPasswordValid = await user.isPasswordCorrect(password)
+
+    if (!isPasswordValid) {
+        throw new ApiError(401, "password incorrect");
+    }
+
+    const Token = await generateTokens(user._id)
+
+    const loggedInUser = await User.findById(user._id).select("-password")
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            {
+                user: loggedInUser, Token
+            },
+            "User logged In successfully"
+        )
+    )
+
+})
 
 export {
     registerUser,
-
+    loginUser
 }
