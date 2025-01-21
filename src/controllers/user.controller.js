@@ -2,8 +2,6 @@ import {asyncHandler} from "../utils/asyncHandler.js"
 import{ApiResponse} from "../utils/ApiResponse.js"
 import {ApiError} from "../utils/ApiError.js"
 import {User} from "../models/user.model.js"
-import jwt from "jsonwebtoken"
-import mongoose from "mongoose"
 
 const generateTokens = async (userId) => {
     try {
@@ -18,7 +16,7 @@ const generateTokens = async (userId) => {
 }
 
 const registerUser = asyncHandler(async (req, res) => {
-    console.log("Request Body:", req.body);
+    // console.log("Request Body:", req.body);
 
     if (!req.body) {
         throw new ApiError(400, "Request body is missing");
@@ -57,6 +55,7 @@ const registerUser = asyncHandler(async (req, res) => {
     );
 });
 
+
 const loginUser = asyncHandler(async (req,res) => {
 
     const {email, password} = req.body
@@ -69,8 +68,8 @@ const loginUser = asyncHandler(async (req,res) => {
         throw new Error(400, " password is required");
     }
 
-    console.log("Request Body:", req.body); // Logs entire body
-    console.log("Email:", email);
+    // console.log("Request Body:", req.body);
+    // console.log("Email:", email);
 
     const user = await User.findOne({email})
 
